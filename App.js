@@ -6,17 +6,23 @@ import React, { useEffect, useState } from 'react';
 const windowWidth = Dimensions.get('window').width; // = cconst {width: SCREEN_WIDTH } = Dimensions.get('window');와 같다
 
 export default function App() {
-  const [location, setLocation] = useState(); //현재 위치 받기
+  const [city, setCity] = useState("Loading..."); // 값이 반환 되기 전에 loading 이라고 뜸
   const [ok, setOk] = useState(true); //ok 여부 받기
 
   const ask = async() => { //유저의 위치를 불러오는 것을 허락을 받는 메서드
-    const {granted} = await Location.requestForegroundPermissionsAsync();
+    const {granted} = await Location.requestForegroundPermissionsAsync(); //안에 있는 것을 불러올 땐  {}를 사ㅇ
     if(!granted){ //grant 받지 않았을 경우, false로 볌경
       setOk(false);
     }
 
-    const location = await Location.getCurrentPositionAsync({accuracy:5});
-    console.log(location);
+    const {coords: {latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy:5}); //유저의 좌표 가져오기
+    const location = await Location.reverseGeocodeAsync(
+      {latitude, longitude},
+      {useGoogleMaps: false} //좌표로 현재 위치 반환하기
+    );
+
+    setCity(location[0].city) //도시명 반환, 배열 형태임
+  
   }
   
   useEffect(() => {
@@ -26,7 +32,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.city}>
-        <Text style={styles.cityName}>Tokyo</Text>
+        <Text style={styles.cityName}>{city}</Text>
       </View>
       <ScrollView
         pagingEnabled //불필요한 스크롤 넘김을 방지하는 페이지 네이션 사용
