@@ -1,9 +1,28 @@
 import { StatusBar } from 'expo-status-bar';
+import * as Location from 'expo-location'; //location 관련 api 추가
 import { StyleSheet, Text, View, ScrollView, Dimensions, pagingEnabled } from 'react-native';
+import React, { useEffect, useState } from 'react';
 
 const windowWidth = Dimensions.get('window').width; // = cconst {width: SCREEN_WIDTH } = Dimensions.get('window');와 같다
 
 export default function App() {
+  const [location, setLocation] = useState(); //현재 위치 받기
+  const [ok, setOk] = useState(true); //ok 여부 받기
+
+  const ask = async() => { //유저의 위치를 불러오는 것을 허락을 받는 메서드
+    const {granted} = await Location.requestForegroundPermissionsAsync();
+    if(!granted){ //grant 받지 않았을 경우, false로 볌경
+      setOk(false);
+    }
+
+    const location = await Location.getCurrentPositionAsync({accuracy:5});
+    console.log(location);
+  }
+  
+  useEffect(() => {
+    ask();
+  },[]) //맨 처음 랜더링 될 때 한 번만 실행됨
+
   return (
     <View style={styles.container}>
       <View style={styles.city}>
