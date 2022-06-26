@@ -63,7 +63,7 @@ export default function App() {
                 <Text style={styles.temp}>{parseFloat(day.temp.day).toFixed(1)}</Text>
                 <Text style={styles.description}>{day.weather[0].main}</Text>
                 <Text style={styles.tinyText}>{day.weather[0].description}</Text>
-              </View> //소수점 첫째 자리까지만 보여줌
+              </View> //소수점 첫째 자리까지만 보여줌, 밑에 날씨 설명 추가
               )
             )}
       <StatusBar></StatusBar>
