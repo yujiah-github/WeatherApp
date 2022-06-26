@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Location from 'expo-location'; //location 관련 api 추가
-import { StyleSheet, Text, View, ScrollView, Dimensions, pagingEnabled } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Dimensions, pagingEnabled, ActivityIndicator} from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 const windowWidth = Dimensions.get('window').width; // = cconst {width: SCREEN_WIDTH } = Dimensions.get('window');와 같다
@@ -8,9 +8,12 @@ const windowWidth = Dimensions.get('window').width; // = cconst {width: SCREEN_W
 export default function App() {
   const [city, setCity] = useState("Loading..."); // 값이 반환 되기 전에 loading 이라고 뜸
   const [ok, setOk] = useState(true); //ok 여부 받기
+  const [days, setDays] = useState([]); //날씨를 저장
 
-  const ask = async() => { //유저의 위치를 불러오는 것을 허락을 받는 메서드
-    const {granted} = await Location.requestForegroundPermissionsAsync(); //안에 있는 것을 불러올 땐  {}를 사ㅇ
+  const API_KEY = '09a5c8b544473c48931574029389b823'; //원래는 서버에 두는 것이 더 안전함.
+  
+  const getWeather = async() => { //유저의 위치를 불러오는 것을 허락을 받는 메서드
+    const {granted} = await Location.requestForegroundPermissionsAsync(); //안에 있는 것을 불러올 땐  {}를 사용
     if(!granted){ //grant 받지 않았을 경우, false로 볌경
       setOk(false);
     }
@@ -22,11 +25,16 @@ export default function App() {
     );
 
     setCity(location[0].city) //도시명 반환, 배열 형태임
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}&units=metric`
+    ); //날씨 api 받기
+    const json = await response.json(); //response를 json 형태로 받기
+    setDays(json.daily); //json 안에 있는 daily를 가져와서 days로 셋팅해주기
   
   }
   
   useEffect(() => {
-    ask();
+    getWeather();
   },[]) //맨 처음 랜더링 될 때 한 번만 실행됨
 
   return (
@@ -39,21 +47,26 @@ export default function App() {
         horizontal
         showsHorizontalScrollIndicator={true} //스크롤 인디케이터 표시 여부
         indicatorStyle={'white'} //ios 에서만 동작
-        contentContainerStyle={styles.weather}>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-      </ScrollView>
+        contentContainerStyle={styles.weather}
+        >
+          {days.length === 0 ? ( //days의 길이가 0이면 ActivityIndicator 반환
+            <View style={styles.day}>
+              <ActivityIndicator
+                color="white" //색깔은 흰색
+                styles={{marginTop: 10}} //위로 10
+                size="large" //크기는 large
+                />
+            </View>
+            ) : (
+              days.map((day, index) =>
+              <View key={index} styles={styles.day}>
+                <Text style={styles.temp}>{parseFloat(day.temp.day).toFixed(1)}</Text>
+                <Text style={styles.description}>{day.weather[0].main}</Text>
+              </View>
+              )
+            )}
       <StatusBar></StatusBar>
+      </ScrollView>
     </View>
   );
 }
