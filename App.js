@@ -62,7 +62,8 @@ export default function App() {
               <View key={index} styles={styles.day}>
                 <Text style={styles.temp}>{parseFloat(day.temp.day).toFixed(1)}</Text>
                 <Text style={styles.description}>{day.weather[0].main}</Text>
-              </View>
+                <Text style={styles.tinyText}>{day.weather[0].description}</Text>
+              </View> //소수점 첫째 자리까지만 보여줌
               )
             )}
       <StatusBar></StatusBar>
@@ -109,6 +110,10 @@ const styles = StyleSheet.create({
   description:{
     fontSize: 60,
   },
+
+  tinyText:{
+    fontSize: 20,
+  }
 });
 
 //웹에서는 스크롤이 가능, 앱은 아님
